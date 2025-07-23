@@ -1,0 +1,169 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+import cloudscraper
+import time
+
+class ArtScraper:
+    def __init__(self, supplier_data):
+        self.supplier = supplier_data
+        self.driver = None
+        self.wait = None
+        self.scraper = cloudscraper.create_scraper(
+            browser={
+                'browser': 'chrome',
+                'platform': 'windows',
+                'mobile': False
+            }
+        )
+    
+    def setup_driver(self):
+        # CloudScraper için özel Chrome seçenekleri
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+            "userAgent": self.scraper.headers['User-Agent']
+        })
+        self.wait = WebDriverWait(self.driver, 10)
+    
+    def login(self):
+        try:
+            # Önce CloudScraper ile siteye erişim sağla
+            response = self.scraper.get(self.supplier['website'])
+            if response.status_code != 200:
+                raise Exception(f"Site erişimi başarısız: {response.status_code}")
+            
+            # Selenium ile devam et
+            self.driver.get(self.supplier['website'])
+            
+            # Dealer code gir
+            dealer_code_input = self.wait.until(EC.presence_of_element_located(
+                (By.XPATH, self.supplier['xpaths']['dealer_code'])))
+            dealer_code_input.send_keys(self.supplier['dealer_code'])
+            
+            # Kullanıcı adı gir
+            username_input = self.driver.find_element(By.XPATH, self.supplier['xpaths']['username'])
+            username_input.send_keys(self.supplier['credentials']['username'])
+            
+            # Şifre gir
+            password_input = self.driver.find_element(By.XPATH, self.supplier['xpaths']['password'])
+            password_input.send_keys(self.supplier['credentials']['password'])
+            
+            # Login butonuna tıkla
+            login_button = self.driver.find_element(By.XPATH, self.supplier['xpaths']['login_button'])
+            login_button.click()
+            
+            # Login işleminin tamamlanması için bekleme
+            time.sleep(3)
+            
+        except Exception as e:
+            raise Exception(f"Login hatası: {str(e)}")
+    
+    def search_product(self, search_text):
+        # Arama kutusunu bul ve metni gir
+        search_input = self.wait.until(EC.presence_of_element_located(
+            (By.XPATH, self.supplier['xpaths']['search_input'])))
+        search_input.send_keys(search_text)
+        
+        # Arama butonuna tıkla
+        search_button = self.driver.find_element(By.XPATH, self.supplier['xpaths']['search_button'])
+        search_button.click()
+        
+        # Sonuçların yüklenmesi için bekleme
+        time.sleep(3)
+        
+        # Ürün satırlarını bul
+        product_rows = self.driver.find_elements(By.CSS_SELECTOR, "tr.urun-kutusu")
+        
+        # Sonuçları topla
+        results = []
+        
+        for row in product_rows:
+            try:
+                # Ürün adını al
+                urun_adi = row.find_element(By.CSS_SELECTOR, "div.manufacturer_and_name b").text.strip()
+                
+                # Stok durumunu al
+                stok_durumu = row.find_element(By.CSS_SELECTOR, "td.productQuantity span").text.strip()
+                
+                # Fiyatları al
+                fiyat_cells = row.find_elements(By.CSS_SELECTOR, "td.product_prices")
+                
+                # Fiyat ve birim bilgilerini al
+                fiyatlar = {}
+                for i, cell in enumerate(fiyat_cells):
+                    fiyat = cell.find_element(By.CSS_SELECTOR, "span.text-semibold").text.strip()
+                    birim = cell.get_attribute("data-birim")
+                    kdv = cell.get_attribute("data-kdv")
+                    
+                    if i == 0:
+                        fiyatlar["ozel_fiyat"] = f"{fiyat} {birim}"
+                    elif i == 1:
+                        fiyatlar["bayi_fiyat"] = f"{fiyat} {birim}"
+                    elif i == 2:
+                        fiyatlar["son_kullanici_fiyat"] = f"{fiyat} {birim}"
+                
+                result = {
+                    "urun_adi": urun_adi,
+                    "stok_durumu": stok_durumu,
+                    "fiyatlar": fiyatlar,
+                    "kdv_orani": f"%{kdv}"
+                }
+                
+                # Boş olmayan sonuçları ekle
+                if result["urun_adi"] and result["fiyatlar"]:
+                    results.append(result)
+                    
+            except Exception as e:
+                print(f"Ürün satırı okuma hatası: {str(e)}")
+                continue
+        
+        return results
+    
+    def close_driver(self):
+        if self.driver:
+            self.driver.quit()
+    
+    def perform_search(self, search_text):
+        try:
+            self.setup_driver()
+            self.login()
+            results = self.search_product(search_text)
+            self.close_driver()
+            
+            if len(results) == 0:
+                return {
+                    "status": "no_results",
+                    "message": f"Arama yapıldı fakat '{search_text}' için ürün bulunamadı",
+                    "results": [],
+                    "total_results": 0,
+                    "search_text": search_text
+                }
+            
+            return {
+                "status": "success",
+                "message": "İşlemler başarıyla tamamlandı",
+                "results": results,
+                "total_results": len(results),
+                "search_text": search_text
+            }
+            
+        except Exception as e:
+            self.close_driver()
+            return {
+                "status": "error",
+                "message": f"Bir hata oluştu: {str(e)}",
+                "results": [],
+                "total_results": 0,
+                "search_text": search_text
+            } 
