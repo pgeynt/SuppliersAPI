@@ -3,11 +3,11 @@
     {
       "id": 1,
       "supplier_name": "Bulut",
-      "dealer_code": "17068",
+      "dealer_code": "DEALER_CODE",
       "website": "https://b2b.bulutmarket.com.tr/anasayfa",
       "credentials": {
-        "username": "h.caglar",
-        "password": "YjR36wwfGod^#x"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='tbBayiKodu']",
@@ -21,11 +21,11 @@
     {
       "id": 2,
       "supplier_name": "Eksa",
-      "dealer_code": "MB012689",
+      "dealer_code": "DEALER_CODE",
       "website": "https://www.bayikanali.com/Login.aspx?returnUrl=/index.aspx",
       "credentials": {
-        "username": "h.caglar",
-        "password": "9395c2cd"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='txtInternetCRMNumber']",
@@ -38,11 +38,11 @@
     {
       "id": 3,
       "supplier_name": "Art",
-      "dealer_code": "120.01.8062",
+      "dealer_code": "DEALER_CODE",
       "website": "https://www.pcbayi.com/auth/login",
       "credentials": {
-        "username": "h.caglar@elmacik.com",
-        "password": "XGNDTUY2sj8iEw"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='cari_code']",
@@ -56,11 +56,11 @@
     {
       "id": 4,
       "supplier_name": "Asnet",
-      "dealer_code": "12255",
+      "dealer_code": "DEALER_CODE",
       "website": "https://asnetb2b.com.tr/",
       "credentials": {
-        "username": "h.caglar",
-        "password": "7U#YdUaw&Kkz"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='userCode']",
@@ -76,9 +76,9 @@
       "website": "https://www.oksid.com.tr/bayi/giris.php",
       "main_page": "https://www.oksid.com.tr/",
       "credentials": {
-        "username": "h.caglar",
-        "password": "h.Caglar13",
-        "ocr_api_key": "K89549947788957"
+        "username": "USERNAME",
+        "password": "PASSWORD",
+        "ocr_api_key": "API_KEY"
       },
       "xpaths": {
         "username": "/html/body/div[1]/div/div[2]/div[2]/div[1]/form/ul[1]/li[2]/input",
@@ -92,11 +92,11 @@
     {
       "id": 6,
       "supplier_name": "Kadioglu",
-      "dealer_code": "22826",
+      "dealer_code": "DEALER_CODE",
       "website": "https://www.bilgisayarim.com.tr/login.aspx",
       "credentials": {
-        "username": "admin",
-        "password": "jv6NBduS9DJ$"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='txt_client_code']",
@@ -109,11 +109,11 @@
     {
       "id": 7,
       "supplier_name": "Biosis",
-      "dealer_code": "16751",
+      "dealer_code": "DEALER_CODE",
       "website": "https://www.biosis.com.tr/BayiGiris?url=https://www.biosis.com.tr/",
       "credentials": {
-        "username": "Yönetici",
-        "password": "147258++"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='uyeGirisFormBayi']/div/div[1]/input",
@@ -133,11 +133,11 @@
     {
       "id": 8,
       "supplier_name": "Reser",
-      "dealer_code": "005.07094",
+      "dealer_code": "DEALER_CODE",
       "website": "https://www.reserbayi.com/login/",
       "credentials": {
-        "username": "user",
-        "password": "Za2XG&YyPmfTqG"
+        "username": "USERNAME",
+        "password": "PASSWORD"
       },
       "xpaths": {
         "dealer_code": "//*[@id='bayi_kodu']",
